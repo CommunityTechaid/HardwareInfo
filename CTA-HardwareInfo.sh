@@ -43,7 +43,7 @@ declare -a is_hdd
 #declare -A disk_array
 
 disk_info=$(lsblk --path -AdJo NAME,SIZE,ROTA)
-disk_names+=($(jq '.blockdevices[] | .name' <<< "$disk_info"))
+disk_names+=($(jq -r '.blockdevices[] | .name' <<< "$disk_info"))
 disk_sizes+=($(jq '.blockdevices[] | .size' <<< "$disk_info"))
 is_hdd+=($(jq '.blockdevices[] | .rota' <<< "$disk_info"))
 
@@ -102,11 +102,60 @@ for name in ${disk_names[@]};
 do 
 	#this command works in shell but cannot find device type when run through the script. 
 	disk_health=$(sudo smartctl -s on -a "$name")
-	printf "$disk_health"
+	printf "%s" "$disk_health"
 done
 
 printf "\n\n# BATTERY HEALTH #\n\n"
-battery_health=$(sudo acpitool -B)
-printf "%s" $battery_health 
-printf "\n\n"
+# /sys/class/power_supply/BAT* could have different files apparently according to whether AC is conencted or not
+# In order to handle this, we check the files before we parse them. The files could either be energy_* or charge_*
+
+#get battery model
+{ battery_model=$(< /sys/class/power_supply/BAT*/model_name | head -n 1); } 2> /dev/null
+printf "Batter Model: %s \n" "$battery_model"
+
+#get battery technology
+{ battery_tech=$(< /sys/class/power_supply/BAT*/technology | head -n 1); } 2> /dev/null
+printf "Batter Model: %s \n" "$battery_tech"
+
+#[[ -f foo.txt ]] && s=$(<foo.txt) || s=''
+
+battery_rated_is_available=0
+battery_current_is_available=0
+
+# get the rated or designed capacity
+if [ -f /sys/class/power_supply/BAT*/energy_full_design ]
+then
+        #we take the first value in case of multiple batteries found
+        battery_capacity_rated=$(cat /sys/class/power_supply/BAT*/energy_full_design | head -n 1)
+        battery_rated_is_available=1
+
+elif [ -f /sys/class/power_supply/BAT*/charge_full_design ]
+then
+        #we take the first value in case of multiple batteries found
+        battery_capacity_rated=$(cat /sys/class/power_supply/BAT*/charge_full_design | head -n 1)
+        battery_rated_is_available=1
+fi
+
+# get the actual capacity currently
+if [ -f /sys/class/power_supply/BAT*/energy_full ]
+then
+        #we take the first value in case of multiple batteries found
+        battery_capacity_current=$(cat /sys/class/power_supply/BAT*/energy_full | head -n 1)
+        battery_current_is_available=1
+
+elif [ -f /sys/class/power_supply/BAT*/charge_full ]
+then
+        #we take the first value in case of multiple batteries found
+        battery_capacity_current=$(cat /sys/class/power_supply/BAT*/charge_full | head -n 1)
+        battery_current_is_available=1
+fi
+
+if [[ $battery_rated_is_available && $battery_current_is_available ]]
+then
+        battery_health=$((($battery_capacity_current*100)/$battery_capacity_rated))
+        printf "Battery Health: %d%%\n" "$battery_health"
+else
+        print "Battery Health: Not found"
+fi
+
 
