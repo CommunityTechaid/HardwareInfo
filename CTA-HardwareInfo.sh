@@ -61,8 +61,9 @@ disk_names+=($(jq -r '.blockdevices[] | .name' <<< "$disk_info"))
 disk_sizes+=($(jq '.blockdevices[] | .size' <<< "$disk_info"))
 is_hdd+=($(jq '.blockdevices[] | .rota' <<< "$disk_info"))
 
-disk_number=$(jq length <<< "$disk_info")
+disk_number=$(jq '.blockdevices' <<< "$disk_info" | jq length)
 
+printf "DISK NUMBER $disk_number"
 ##
 ## DISPLAY SYSTEM INFORMATION
 ##
