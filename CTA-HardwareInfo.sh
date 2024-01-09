@@ -17,46 +17,55 @@
 #    - health
 #
 ###
-# required tools: jq, lshw, acpitool, smartmontools 
+# required tools: jq, lshw, smartmontools
 
-system_info=$(sudo lshw -json)
+### HELPER FUNCTIONS
+
+exists() { [[ -f $1 ]]; }
+
+###
+
+
+system_info=$(lshw -json)
 
 system_manufacturer=$(jq '.vendor' <<< "$system_info")
 system_serial_number=$(jq '.serial' <<< "$system_info")
 system_model=$(jq '.product' <<< "$system_info")
 system_version=$(jq '.version' <<< "$system_info")
 
-cpu_info=$(sudo lshw -json -class cpu)
+##
+## CPU Details
+##
+cpu_info=$(lshw -json -class cpu)
 
 cpu_type=$(jq '.[].product' <<< "$cpu_info")
 cpu_bits=$(jq '.[].width' <<< "$cpu_info")
 cpu_cores=$(jq '.[].configuration.cores' <<< "$cpu_info")
 
-tpm_version=$(sudo cat /sys/class/tpm/tpm0/tpm_version_major)
+tpm_version=$(cat /sys/class/tpm/tpm0/tpm_version_major)
 
+##
+## RAM
+##
 ram_installed=$(jq '.children[] | select(.id == "core").children[] | select(.id == "memory").size ' <<< "$system_info" | numfmt --to=iec)
 
-#declare -a disk_list
+##
+## Storage details
+##
 declare -a disk_names
 declare -a disk_sizes
 declare -a is_hdd
-#declare -A disk_array
 
 disk_info=$(lsblk --path -AdJo NAME,SIZE,ROTA)
 disk_names+=($(jq -r '.blockdevices[] | .name' <<< "$disk_info"))
 disk_sizes+=($(jq '.blockdevices[] | .size' <<< "$disk_info"))
 is_hdd+=($(jq '.blockdevices[] | .rota' <<< "$disk_info"))
 
-#disk_list+=($(lsblk -aAJ | jq '.blockdevices[] | select(.type="disk") | .name'))
-
-#for i in $disk_list;
-#    do 
-#        size=$(lsblk -aAJ | jq '.blockdevices[] | select(.type="disk") | select(.name="$i") | .size')
-#        disk_array[$i]+=$size
-#    done
-
 disk_number=$(jq length <<< "$disk_info")
 
+##
+## DISPLAY SYSTEM INFORMATION
+##
 printf \
 "# System info #
 
@@ -82,42 +91,46 @@ RAM: %s
 "$cpu_bits" \
 "$cpu_cores" \
 "$tpm_version" \
-"$ram_installed" 
+"$ram_installed"
 
 printf "Disk number : %s\n" "$disk_number"
 printf "\n\n# DISK INFO #\n"
 printf "%-15s %-10s %-10s \n" \
-	"NAME" "SIZE" "HDD"
+        "NAME" "SIZE" "HDD"
 
-for ((i=1;i<=disk_number;i++)); do 
-	printf "%-15s %-10s %-10s \n" \
-		"$disk_names[$i]" \
-		"$disk_sizes[$i]" \
-		"$is_hdd[$i]"
-	done
+for ((i=1;i<=disk_number;i++)); do
+        printf "%-15s %-10s %-10s \n" \
+                "$disk_names[$i]" \
+                "$disk_sizes[$i]" \
+                "$is_hdd[$i]"
+        done
 
-
+##
+## DISK HEALTH DETAILS
+##
 printf "\n\n# DISK HEALTH REPORTS #\n\n"
 for name in ${disk_names[@]};
-do 
-	#this command works in shell but cannot find device type when run through the script. 
-	disk_health=$(sudo smartctl -s on -a "$name")
-	printf "%s" "$disk_health"
+do
+        disk_health=$(smartctl -s on -a "$name")
+        printf "%s" "$disk_health"
 done
 
+##
+## DISPLAY BATTERY HEALTH DETAILS
+##
 printf "\n\n# BATTERY HEALTH #\n\n"
 # /sys/class/power_supply/BAT* could have different files apparently according to whether AC is conencted or not
 # In order to handle this, we check the files before we parse them. The files could either be energy_* or charge_*
 
 #get battery model
-{ battery_model=$(< /sys/class/power_supply/BAT*/model_name | head -n 1); } 2> /dev/null
+#{ battery_model=$(< /sys/class/power_supply/BAT*/model_name | head -n 1); } 2> /dev/null
+exists /sys/class/power_supply/BAT*/model_name && battery_model=$(</sys/class/power_supply/BAT*/model_name | head -n 1) || battery_model='Unknown'
 printf "Batter Model: %s \n" "$battery_model"
 
 #get battery technology
-{ battery_tech=$(< /sys/class/power_supply/BAT*/technology | head -n 1); } 2> /dev/null
-printf "Batter Model: %s \n" "$battery_tech"
-
-#[[ -f foo.txt ]] && s=$(<foo.txt) || s=''
+#{ battery_tech=$(< /sys/class/power_supply/BAT*/technology | head -n 1); } 2> /dev/null
+exists /sys/class/power_supply/BAT*/technology && battery_tech=$(</sys/class/power_supply/BAT*/technology | head -n 1) || battery_tech='Unknown'
+printf "Batter Technology: %s \n" "$battery_tech"
 
 battery_rated_is_available=0
 battery_current_is_available=0
@@ -157,5 +170,4 @@ then
 else
         print "Battery Health: Not found"
 fi
-
 
