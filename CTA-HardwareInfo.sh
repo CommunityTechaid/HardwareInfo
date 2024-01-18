@@ -25,6 +25,10 @@ exists() { [[ -f $1 ]]; }
 
 ###
 
+#get device type - the returned value is a number that can be looked up on https://www.dmtf.org/standards/SMBIOS
+# 2 -> Unknown
+#refer https://superuser.com/questions/877677/programatically-determine-if-an-script-is-being-executed-on-laptop-or-desktop
+exists /sys/class/dmi/id/chassis_type && device_type=$(</sys/class/dmi/id/chassis_type) || device_type='2'
 
 system_info=$(lshw -json)
 
@@ -83,6 +87,8 @@ TPM version: %s
 
 RAM: %s
 
+DEVICE TYPE ID: %s
+
 " \
 "$system_manufacturer" \
 "$system_model" \
@@ -92,7 +98,8 @@ RAM: %s
 "$cpu_bits" \
 "$cpu_cores" \
 "$tpm_version" \
-"$ram_installed"
+"$ram_installed" \
+"$device_type"
 
 printf "Disk number : %s\n" "$disk_number"
 printf "\n\n# DISK INFO #\n"
