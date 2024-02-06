@@ -11,7 +11,7 @@ exists() { [[ -f $1 ]]; }
 ## Variables
 ##
 
-output_dir="output"
+output_dir="/usr/output"
 
 #####################
 
