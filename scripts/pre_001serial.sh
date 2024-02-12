@@ -1,4 +1,4 @@
-#! /usr/bin/zsh
+#! /usr/bin/bash
 exec 3>&1
 dlg_backtitle="Community TechAid - Device Serial"
 

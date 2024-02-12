@@ -11,7 +11,7 @@ exists() { [[ -f $1 ]]; }
 ## Variables
 ##
 
-output_dir="output"
+output_dir="/usr/output"
 
 #####################
 
@@ -37,7 +37,12 @@ cpu_type=$(jq -r '.[].product' <<< "$cpu_info")
 cpu_bits=$(jq -r '.[].width' <<< "$cpu_info")
 cpu_cores=$(jq -r '.[].configuration.cores' <<< "$cpu_info")
 
-tpm_version=$(cat /sys/class/tpm/tpm0/tpm_version_major)
+if [[ -f /sys/class/tpm/tpm0/tpm_version_major ]]
+then
+    tpm_version=$(</sys/class/tpm/tpm0/tpm_version_major)
+else
+    tpm_version="No TPM"
+fi
 
 ##
 ## RAM
@@ -64,18 +69,18 @@ for ((i=1;i<=disk_number;i++)); do
 done
 
 output_string=$(jq -n \
-                  --arg make "$system_manufacturer" \
-                  --arg model "$system_model" \
-                  --arg version "$system_version" \
-                  --arg serialNo "$system_serial_number" \
-                  --arg cpuType "$cpu_type" \
-                  --arg cpuBits "$cpu_bits" \
-                  --arg cpuCores "$cpu_cores" \
-                  --arg tpmVersion "$tpm_version" \
-                  --arg ramCapacity "$ram_installed" \
-		  --arg type "$device_type" \
-		  --arg typeOfStorage "$is_hdd" \
-		  --arg storageCapacity "$disk_sizes" \
+                   --arg make "$system_manufacturer" \
+                   --arg model "$system_model" \
+                   --arg version "$system_version" \
+                   --arg serialNo "$system_serial_number" \
+                   --arg cpuType "$cpu_type" \
+                   --arg cpuBits "$cpu_bits" \
+                   --arg cpuCores "$cpu_cores" \
+                   --arg tpmVersion "$tpm_version" \
+                   --arg ramCapacity "$ram_installed" \
+                   --arg type "$device_type" \
+                   --arg typeOfStorage "$is_hdd" \
+                   --arg storageCapacity "$disk_sizes" \
                    '$ARGS.named')
 
 
@@ -87,7 +92,7 @@ if [ ! -d "$output_dir" ]; then
 	mkdir $output_dir
 fi
 
-echo $output_string > "${output_dir}/devices_$(date +"%s").json"
+echo $output_string > "${output_dir}/devices_$(date +%s).json"
 
 ### PRINTING FOR TROUBLESHOOTING
 #
@@ -97,20 +102,20 @@ echo $output_string > "${output_dir}/devices_$(date +"%s").json"
 ##
 #printf \
 #"# System info #
-
+#
 #Vendor: %s
 #Model: %s
 #Version: %s
 #Serial Number: %s
-
+#
 #CPU: %s
 #CPU bits: %s
 #CPU cores: %s
-
+#
 #TPM version: %s
-
+#
 #RAM: %s
-
+#
 #Device Type Key: %s
 #" \
 #"$system_manufacturer" \
@@ -123,6 +128,7 @@ echo $output_string > "${output_dir}/devices_$(date +"%s").json"
 #"$tpm_version" \
 #"$ram_installed" \
 #"$device_type"
-
+#
 ##################################
-
+#
+exit
