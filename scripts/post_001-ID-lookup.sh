@@ -8,6 +8,11 @@ generate_filename () {
 }
 
 #get_target_filename
+    # Dir on Theta is /srv/netboot/log/test-shredos/CTA-IDs/
+    # LFTP home should be /srv/netboot/log/, hence the shorter
+    filename=$1
+    base_dir="/test-shredos/CTA-IDs"
+    lftp "open 10.0.0.1; user netboot-log ThreeInOne!; cd $base_dir; get $filename"
 
 target=$(generate_filename)
 echo $target
