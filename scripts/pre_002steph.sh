@@ -92,7 +92,7 @@ if [ ! -d "$output_dir" ]; then
 	mkdir $output_dir
 fi
 
-echo $output_string > "${output_dir}/devices_$(date +%s).json"
+echo $output_string > "${output_dir}/$(date +%Y-%m-%d)--$system_serial_number.json"
 
 ### PRINTING FOR TROUBLESHOOTING
 #
