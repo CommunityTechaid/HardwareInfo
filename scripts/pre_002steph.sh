@@ -1,4 +1,4 @@
-#! /usr/bin/zsh
+#! /usr/bin/bash
 
 #####################
 
@@ -37,8 +37,7 @@ cpu_type=$(jq -r '.[].product' <<< "$cpu_info")
 cpu_bits=$(jq -r '.[].width' <<< "$cpu_info")
 cpu_cores=$(jq -r '.[].configuration.cores' <<< "$cpu_info")
 
-if [[ -f /sys/class/tpm/tpm0/tpm_version_major ]]
-then
+if [[ -f /sys/class/tpm/tpm0/tpm_version_major ]]; then
     tpm_version=$(</sys/class/tpm/tpm0/tpm_version_major)
 else
     tpm_version="No TPM"
@@ -65,7 +64,7 @@ disk_number=$(jq '.blockdevices' <<< "$disk_info" | jq length)
 
 total_storage=0
 for ((i=1;i<=disk_number;i++)); do
-	total_storage+=$disk_sizes[$i]       
+    total_storage+=${disk_sizes[$i]}
 done
 
 output_string=$(jq -n \
@@ -89,10 +88,10 @@ output_string=$(jq -n \
 ##
 
 if [ ! -d "$output_dir" ]; then
-	mkdir $output_dir
+    mkdir $output_dir
 fi
 
-echo $output_string > "${output_dir}/$(date +%Y-%m-%d)--$system_serial_number.json"
+echo "$output_string" > "${output_dir}/$(date +%Y-%m-%d)--$system_serial_number.json"
 
 ### PRINTING FOR TROUBLESHOOTING
 #
