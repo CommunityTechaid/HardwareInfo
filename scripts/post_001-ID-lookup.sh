@@ -16,33 +16,36 @@ get_target_filename () {
     lftp -c "debug; open 10.0.0.1; user netboot-log ThreeInOne\!; cd $base_dir; get $filename -o DEVICE_ID.txt"
 }
 
+get_wipe_status () {
+    # Find local file
+    # Grep local file for status
+    # echo string to display
+    # ?? CHANGE nwipe logfile naming convention to include $targetfilename string ??
+    return
+}
 
 
 target=$(generate_filename)
 get_target_filename "$target"
 device_id="$(<DEVICE_ID.txt)"
+wipe_status=$(get_wipe_status)
 
-echo "Target: $target"
-echo "CTA ID: $device_id"
-echo " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! "
+dialog \
+    --aspect 4 \
+    --cr-wrap \
+    --no-cancel \
+    --no-collapse \
+    --colors \
+    --ok-label "Continue" \
+    --backtitle "CTA Device ID" \
+    --title 'CTA ID'\
+    --msgbox "Device ID: $device_id
 
-read -n 1 -p "PRESS A BUTTON TO CONTINUE"
+Wipe status: $wipe_status
 
-# show_device_id () {
-#     dialog \
-#         --no-cancel \
-#         --colors \
-#         --backtitle "CTA Device ID" \
-#         --title 'CTA ID'\
-#         --infobox "Device ID: $device_id \n\n\nHave you entered the serial number in the CTA app?" \
-#         30 60
-# }
+Please label the device.
 
-# until show_serial_number; do :; done
-
-# clear
-
-# exec 3>&-
-
+Press enter to continue." \
+    0 0
 
 exit
