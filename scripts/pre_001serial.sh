@@ -1,11 +1,10 @@
 #! /usr/bin/bash
-# exec 3>&1
+exec 3>&1
 dlg_backtitle="Community TechAid - Device Serial"
 
 
 dlg () {
-    # dialog --no-cancel --colors --backtitle "${dlg_backtitle}" "$@"  2>&1 1>&3
-    dialog --no-cancel --colors --backtitle "${dlg_backtitle}" "$@"
+    dialog --no-cancel --colors --backtitle "${dlg_backtitle}" "$@"  2>&1 1>&3
 }
 
 #GET SYSTEM INFO WITH lshw
@@ -21,4 +20,4 @@ until show_serial_number; do :; done
 
 clear
 
-# exec 3>&-
+exec 3>&-
