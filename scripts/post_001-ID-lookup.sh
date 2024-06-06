@@ -1,8 +1,9 @@
 #! /usr/bin/bash
 
+date_string="$(date +%Y-%m-%d)"
+serial_number=$(lshw -class system -json | jq -r '.[0].serial')
+
 generate_filename () {
-    date_string="$(date +%Y-%m-%d)"
-    serial_number=$(lshw -class system -json | jq -r '.[0].serial')
     suffix=".json.CTAid"
     target_filename="$date_string--$serial_number""$suffix"
     echo "$target_filename"
@@ -17,13 +18,25 @@ get_target_filename () {
 }
 
 get_wipe_status () {
-    # Find local file
+    # Create local file prefix
+    local_filename='nwipe_log_'"$date_string"'--'"$serial_number"
     # Grep local file for status
-    # echo string to display
-    # ?? CHANGE nwipe logfile naming convention to include $targetfilename string ??
-    return
-}
+    # grep -q Pass ./"$local_filename"*
+    # grep_pass_status=$?
+    # grep -q Failed ./"$local_filename"*
+    # grep_fail_status=$?
 
+    # Grep will return successful exit code on finding the string
+    if grep -q 'Nwipe successfully completed.' ./"$local_filename"*; then
+        wipe_status="Wiped."
+    else
+        # More logic needed to handle aborted / other messages
+        wipe_status="FAILED!"
+    fi
+    # Echo to return the string, tee to also output to plain text file for ease of lookup
+    # in other post_ scripts
+    echo $wipe_status | tee WIPE_STATUS.txt
+}
 
 target=$(generate_filename)
 get_target_filename "$target"
@@ -36,14 +49,14 @@ dialog \
     --no-cancel \
     --no-collapse \
     --colors \
-    --ok-label "Continue" \
+    --ok-label "I have labelled the device." \
     --backtitle "CTA Device ID" \
     --title 'CTA ID'\
     --msgbox "Device ID: $device_id
 
 Wipe status: $wipe_status
 
-Please label the device.
+Please make sure the device is labelled.
 
 Press enter to continue." \
     0 0
