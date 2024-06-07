@@ -26,6 +26,16 @@ get_wipe_status () {
     # grep -q Failed ./"$local_filename"*
     # grep_fail_status=$?
 
+    ### Debug stuff ###
+    echo "Current directory: "
+    pwd
+    printf "\nLooking for logfile prefix:"
+    echo "$local_filename"
+    printf "Output of grepping for 'Nwipe successfully completed' in ./logfile:"
+    grep 'Nwipe successfully completed.' ./"$local_filename"*
+    read -n 1 -p "Please show the above to TomC"
+    ### End debug stuff ###
+
     # Grep will return successful exit code on finding the string
     if grep -q 'Nwipe successfully completed.' ./"$local_filename"*; then
         wipe_status="Wiped."
