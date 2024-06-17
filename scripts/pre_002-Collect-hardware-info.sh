@@ -1,6 +1,10 @@
 #! /usr/bin/bash
 
 #####################
+#
+# Script to programmatically collect hardware infomation to then add to TaDa
+#
+#####################
 
 ##
 ## HELPER FUNCTIONS

@@ -1,4 +1,10 @@
 #!/usr/bin/bash
+###
+#
+# Script to display warning dialog before shutting down the machine
+#
+###
+
 dialog \
     --aspect 4 \
     --cr-wrap \
@@ -9,7 +15,7 @@ dialog \
     --backtitle "CTA Device Wiping" \
     --title 'CTA ID'\
     --msgbox "Press enter to shutdown." \
-    0 0
+    10 30
 
 # Use exit status so ESC (exit status 255) can avoid poweroff for testing etc.
 exit_status=$?

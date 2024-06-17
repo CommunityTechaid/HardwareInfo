@@ -1,4 +1,10 @@
 #! /usr/bin/bash
+###
+#
+# Script to display CTA ID and wipe status to user
+#
+###
+
 
 date_string="$(date +%Y-%m-%d)"
 serial_number=$(lshw -class system -json | jq -r '.[0].serial')
@@ -61,6 +67,6 @@ Wipe status: $wipe_status
 Please make sure the device is labelled.
 
 Press enter to continue." \
-    0 0
+    10 30
 
 exit
