@@ -19,7 +19,8 @@ get_target_filename () {
 
 get_wipe_status () {
     # Create local file prefix
-    local_filename='nwipe_log_'"$date_string"'--'"$serial_number"
+    # local_filename='nwipe_log_'"$date_string"'--'"$serial_number"
+    local_filename='nwipe_log_'"$date_string"'--'"$device_id"'--'"$serial_number"
     # Grep local file for status
     # grep -q Pass ./"$local_filename"*
     # grep_pass_status=$?
@@ -39,9 +40,9 @@ get_wipe_status () {
     echo $wipe_status | tee WIPE_STATUS.txt
 }
 
-target=$(generate_filename)
-get_target_filename "$target"
-device_id="$(<DEVICE_ID.txt)"
+# target=$(generate_filename)
+# get_target_filename "$target"
+device_id="$(<CTA_ID)"
 wipe_status=$(get_wipe_status)
 
 dialog \
