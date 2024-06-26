@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-###
+#####################
 #
 # Script to sync hardware clock with NTP
 #
@@ -7,7 +7,11 @@
 # calculate drift / accuracy and only Theta / 10.0.0.1 is accessible over the
 # wiping network.)
 #
-###
+# reqs: --
+# input: --
+# output: --
+#
+#####################
 
 theta_ip=10.0.0.1
 

@@ -1,9 +1,13 @@
 #! /usr/bin/bash
-###
+#####################
 #
 # Script to capture CTA ID input from users
 #
-###
+# reqs: --
+# input: User input CTA device ID
+# output: CTA_ID - simple file containing CTA device id
+#
+#####################
 
 exec 3>&1
 

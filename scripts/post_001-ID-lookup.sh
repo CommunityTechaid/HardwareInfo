@@ -1,9 +1,14 @@
 #! /usr/bin/bash
-###
+#####################
 #
 # Script to display CTA ID and wipe status to user
 #
-###
+# reqs: --
+# input: CTA_ID file,
+#        nwipe log file
+# output: WIPE_STATUS - file containing wipe status of the device
+#
+#####################
 
 
 date_string="$(date +%Y-%m-%d)"
@@ -43,7 +48,7 @@ get_wipe_status () {
     fi
     # Echo to return the string, tee to also output to plain text file for ease of lookup
     # in other post_ scripts
-    echo $wipe_status | tee WIPE_STATUS.txt
+    echo $wipe_status | tee WIPE_STATUS
 }
 
 # target=$(generate_filename)

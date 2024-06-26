@@ -1,8 +1,11 @@
 #! /usr/bin/bash
-
 #####################
 #
 # Script to programmatically collect hardware infomation to then add to TaDa
+#
+# reqs: --
+# input: --
+# output: /usr/output/$(date +%Y-%m-%d)--$system_serial_number.json - .json file containing hardware info
 #
 #####################
 

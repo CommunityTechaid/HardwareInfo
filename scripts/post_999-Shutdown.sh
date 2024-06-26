@@ -1,9 +1,13 @@
 #!/usr/bin/bash
-###
+#####################
 #
 # Script to display warning dialog before shutting down the machine
 #
-###
+# reqs: --
+# input: --
+# output: --
+#
+#####################
 
 dialog \
     --aspect 4 \
