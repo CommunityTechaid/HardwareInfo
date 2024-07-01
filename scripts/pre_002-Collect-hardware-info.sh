@@ -4,8 +4,8 @@
 # Script to programmatically collect hardware infomation to then add to TaDa
 #
 # reqs: --
-# input: --
-# output: /usr/output/$(date +%Y-%m-%d)--$system_serial_number.json - .json file containing hardware info
+# input: CTA_ID file for ID
+# output: /usr/output/$(date +%Y-%m-%d)--$device_id--$system_serial_number.json - .json file containing hardware info
 #
 #####################
 
@@ -21,6 +21,13 @@ exists() { [[ -f $1 ]]; }
 output_dir="/usr/output"
 
 #####################
+
+## Device ID from file
+if [[ -f CTA_ID ]]; then
+    device_id=$(<CTA_ID)
+else
+    device_id=0000
+fi
 
 #get device type - the returned value is a number that can be looked up on https://www.dmtf.org/standards/SMBIOS
 # 2 -> Unknown
@@ -75,6 +82,7 @@ for ((i=1;i<=disk_number;i++)); do
 done
 
 output_string=$(jq -n \
+                   --arg id "$device_id" \
                    --arg make "$system_manufacturer" \
                    --arg model "$system_model" \
                    --arg version "$system_version" \
@@ -98,7 +106,7 @@ if [ ! -d "$output_dir" ]; then
     mkdir $output_dir
 fi
 
-echo "$output_string" > "${output_dir}/$(date +%Y-%m-%d)--$system_serial_number.json"
+echo "$output_string" > "${output_dir}/$(date +%Y-%m-%d)--$device_id--$system_serial_number.json"
 
 ### PRINTING FOR TROUBLESHOOTING
 #
