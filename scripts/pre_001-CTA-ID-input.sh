@@ -6,6 +6,7 @@
 # reqs: --
 # input: User input CTA device ID
 # output: CTA_ID - simple file containing CTA device id
+#         STATUS - simple file containing status
 #
 #####################
 
@@ -43,6 +44,31 @@ until get_device_id && check_id && confirm_id; do :; done
 
 # Output $DEV_ID var to CTA_ID file
 echo "$DEV_ID" > CTA_ID
+
+# Set STATUS to received as device now deffo in the building
+# PROCESSING_START == Received
+echo "PROCESSING_START" > STATUS
+
+# Create .json format to push
+output_string=$(jq -n \
+                   --arg id "$DEV_ID" \
+                   --arg status "$(<STATUS)" \
+                   '$ARGS.named')
+
+echo "$output_string" > "$DEV_ID".status
+
+# Get kernel params with deets in to push status to Theta
+lftp_user=$(kernel_cmdline_extractor lftp_user)
+lftp_pass=$(kernel_cmdline_extractor lftp_pass)
+
+# Construct command string
+lftp_command="open 10.0.0.1; \
+            user $lftp_user $lftp_pass; \
+            cd test-shredos/statuses; \
+            put $DEV_ID.status ; \
+            exit"
+
+lftp -c "$lftp_command"
 
 clear
 

@@ -56,6 +56,38 @@ get_wipe_status () {
 device_id="$(<CTA_ID)"
 wipe_status=$(get_wipe_status)
 
+# Translate to TaDa statuses and then push to Theta
+# Device wiped = PROCESSING_WIPED
+# Device wipe failed = PROCESSING_FAILED_WIPE
+
+if [ "$wipe_status" = "Wiped." ]; then
+    echo "PROCESSING_WIPED" > STATUS
+else
+    echo "PROCESSING_FAILED_WIPE" > STATUS
+fi
+
+# Create .json format to push
+output_string=$(jq -n \
+                   --arg id "$device_id" \
+                   --arg status "$(<STATUS)" \
+                   '$ARGS.named')
+
+echo "$output_string" > "$device_id".status
+
+# Get kernel params with deets in to push status to Theta
+lftp_user=$(kernel_cmdline_extractor lftp_user)
+lftp_pass=$(kernel_cmdline_extractor lftp_pass)
+
+# Construct command string
+lftp_command="open 10.0.0.1; \
+            user $lftp_user $lftp_pass; \
+            cd test-shredos/statuses; \
+            put STATUS -o $device_id.status ; \
+            exit"
+
+lftp -c "$lftp_command"
+
+
 dialog \
     --aspect 4 \
     --cr-wrap \
