@@ -39,8 +39,16 @@ system_info=$(lshw -json)
 
 system_manufacturer=$(jq -r '.vendor' <<< "$system_info")
 system_serial_number=$(jq -r '.serial' <<< "$system_info")
-system_model=$(jq -r '.product' <<< "$system_info")
-system_version=$(jq -r '.version' <<< "$system_info")
+
+# Swap model & versions for Lenovo as human readable is version for Lenovo
+if [[ $system_manufacturer == "LENOVO" ]]; then
+    system_model=$(jq -r '.version' <<< "$system_info")
+    system_version=$(jq -r '.product' <<< "$system_info")
+else
+    system_model=$(jq -r '.product' <<< "$system_info")
+    system_version=$(jq -r '.version' <<< "$system_info")
+fi
+
 
 ##
 ## CPU Details
