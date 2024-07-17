@@ -89,6 +89,17 @@ for ((i=1;i<=disk_number;i++)); do
     total_storage+=${disk_sizes[$i]}
 done
 
+##
+## BATTERY HEALTH
+## Only works on one battery for the moment.
+##
+batt_root="/sys/class/power_supply/BAT0"
+batt_current_capacity=$(<"$batt_root/energy_full")
+batt_design_capacity=$(<"$batt_root/energy_full_design")
+# Weirdly bc insists on added two decimal points for every scale / level of accuracy so stick to two and drop the .00
+batt_health=$(bc <<< "scale=2; $batt_current_capacity / $batt_design_capacity" | cut -d . -f 1)
+
+
 output_string=$(jq -n \
                    --arg id "$device_id" \
                    --arg make "$system_manufacturer" \
