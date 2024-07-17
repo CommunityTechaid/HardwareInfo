@@ -19,7 +19,7 @@ dialog \
     --backtitle "CTA Device Wiping" \
     --title 'CTA ID'\
     --msgbox "Press enter to shutdown." \
-    10 30
+    20 40
 
 # Use exit status so ESC (exit status 255) can avoid poweroff for testing etc.
 exit_status=$?

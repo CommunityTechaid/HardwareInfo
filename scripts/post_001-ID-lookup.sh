@@ -82,7 +82,7 @@ lftp_pass=$(kernel_cmdline_extractor lftp_pass)
 lftp_command="open 10.0.0.1; \
             user $lftp_user $lftp_pass; \
             cd test-shredos/statuses; \
-            put STATUS -o $device_id.status ; \
+            put $device_id.status ; \
             exit"
 
 lftp -c "$lftp_command"
@@ -95,8 +95,8 @@ dialog \
     --no-collapse \
     --colors \
     --ok-label "I have labelled the device." \
-    --backtitle "CTA Device ID" \
-    --title 'CTA ID'\
+    --backtitle "Community TechAid drive eraser (feat. ShredOS and nwipe)" \
+    --title 'CTA Wipe - Summary'\
     --msgbox "Device ID: $device_id
 
 Wipe status: $wipe_status
@@ -104,6 +104,6 @@ Wipe status: $wipe_status
 Please make sure the device is labelled.
 
 Press enter to continue." \
-    10 30
+    15 40
 
 exit
