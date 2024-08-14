@@ -67,12 +67,23 @@ echo "$output_string" > "$DEV_ID".status
 lftp_user=$(kernel_cmdline_extractor lftp_user)
 lftp_pass=$(kernel_cmdline_extractor lftp_pass)
 
+# Check if we're testing or not
+test_env=$(kernel_cmdline_extractor test_env)
+
+if [ "$test_env" = "yes" ]; then
+    status_dir="test-shredos/statuses"
+else
+    status_dir="shredos/statuses"
+fi
+
 # Construct command string
 lftp_command="open 10.0.0.1; \
             user $lftp_user $lftp_pass; \
-            cd test-shredos/statuses; \
+            cd $status_dir; \
             put $DEV_ID.status ; \
             exit"
+
+lftp -c "$lftp_command"
 
 lftp -c "$lftp_command"
 

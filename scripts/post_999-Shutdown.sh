@@ -17,7 +17,7 @@ dialog \
     --colors \
     --ok-label "Shutdown" \
     --backtitle "CTA Device Wiping" \
-    --title 'CTA ID'\
+    --title 'CTA Wipe - Shutdown'\
     --msgbox "Press enter to shutdown." \
     20 40
 
