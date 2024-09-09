@@ -94,10 +94,19 @@ done
 ## Only works on one battery for the moment.
 ##
 batt_root="/sys/class/power_supply/BAT0"
-batt_current_capacity=$(<"$batt_root/energy_full")
-batt_design_capacity=$(<"$batt_root/energy_full_design")
-# Weirdly bc insists on added two decimal points for every scale / level of accuracy so stick to two and drop the .00
-batt_health=$(echo "scale=2; $batt_current_capacity / $batt_design_capacity" | bc | cut -d . -f 2)
+if  [[ -f "$batt_root/energy_full_design" ]]; then
+    batt_current_capacity=$(<"$batt_root/energy_full")
+    batt_design_capacity=$(<"$batt_root/energy_full_design")
+    # Weirdly bc insists on added two decimal points for every scale / level of accuracy so stick to two and drop the .00
+    batt_health=$(echo "scale=2; $batt_current_capacity / $batt_design_capacity" | bc | cut -d . -f 2)
+elif [[ -f "$batt_root/charge_full_design" ]]; then
+    batt_current_capacity=$(<"$batt_root/charge_full")
+    batt_design_capacity=$(<"$batt_root/charge_full_design")
+    # Weirdly bc insists on added two decimal points for every scale / level of accuracy so stick to two and drop the .00
+    batt_health=$(echo "scale=2; $batt_current_capacity / $batt_design_capacity" | bc | cut -d . -f 2)
+else
+    batt_health="Unknown"
+
 
 
 output_string=$(jq -n \
