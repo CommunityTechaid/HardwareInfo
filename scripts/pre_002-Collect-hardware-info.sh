@@ -106,6 +106,7 @@ elif [[ -f "$batt_root/charge_full_design" ]]; then
     batt_health=$(echo "scale=2; $batt_current_capacity / $batt_design_capacity" | bc | cut -d . -f 2)
 else
     batt_health="Unknown"
+fi
 
 
 
