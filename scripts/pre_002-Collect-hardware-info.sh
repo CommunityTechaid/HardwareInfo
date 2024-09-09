@@ -97,7 +97,7 @@ batt_root="/sys/class/power_supply/BAT0"
 batt_current_capacity=$(<"$batt_root/energy_full")
 batt_design_capacity=$(<"$batt_root/energy_full_design")
 # Weirdly bc insists on added two decimal points for every scale / level of accuracy so stick to two and drop the .00
-batt_health=$(bc <<< "scale=2; $batt_current_capacity / $batt_design_capacity" | cut -d . -f 1)
+batt_health=$(echo "scale=2; $batt_current_capacity / $batt_design_capacity" | bc | cut -d . -f 2)
 
 
 output_string=$(jq -n \
