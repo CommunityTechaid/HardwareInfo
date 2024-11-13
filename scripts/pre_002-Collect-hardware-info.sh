@@ -1,5 +1,12 @@
-#! /usr/bin/zsh
-
+#! /usr/bin/bash
+#####################
+#
+# Script to programmatically collect hardware infomation to then add to TaDa
+#
+# reqs: --
+# input: CTA_ID file for ID
+# output: /usr/output/$(date +%Y-%m-%d)--$device_id--$system_serial_number.json - .json file containing hardware info
+#
 #####################
 
 ##
@@ -15,6 +22,13 @@ output_dir="/usr/output"
 
 #####################
 
+## Device ID from file
+if [[ -f CTA_ID ]]; then
+    device_id=$(<CTA_ID)
+else
+    device_id=0000
+fi
+
 #get device type - the returned value is a number that can be looked up on https://www.dmtf.org/standards/SMBIOS
 # 2 -> Unknown
 #refer https://superuser.com/questions/877677/programatically-determine-if-an-script-is-being-executed-on-laptop-or-desktop
@@ -25,8 +39,16 @@ system_info=$(lshw -json)
 
 system_manufacturer=$(jq -r '.vendor' <<< "$system_info")
 system_serial_number=$(jq -r '.serial' <<< "$system_info")
-system_model=$(jq -r '.product' <<< "$system_info")
-system_version=$(jq -r '.version' <<< "$system_info")
+
+# Swap model & versions for Lenovo as human readable is version for Lenovo
+if [[ $system_manufacturer == "LENOVO" ]]; then
+    system_model=$(jq -r '.version' <<< "$system_info")
+    system_version=$(jq -r '.product' <<< "$system_info")
+else
+    system_model=$(jq -r '.product' <<< "$system_info")
+    system_version=$(jq -r '.version' <<< "$system_info")
+fi
+
 
 ##
 ## CPU Details
@@ -37,8 +59,7 @@ cpu_type=$(jq -r '.[].product' <<< "$cpu_info")
 cpu_bits=$(jq -r '.[].width' <<< "$cpu_info")
 cpu_cores=$(jq -r '.[].configuration.cores' <<< "$cpu_info")
 
-if [[ -f /sys/class/tpm/tpm0/tpm_version_major ]]
-then
+if [[ -f /sys/class/tpm/tpm0/tpm_version_major ]]; then
     tpm_version=$(</sys/class/tpm/tpm0/tpm_version_major)
 else
     tpm_version="No TPM"
@@ -65,10 +86,32 @@ disk_number=$(jq '.blockdevices' <<< "$disk_info" | jq length)
 
 total_storage=0
 for ((i=1;i<=disk_number;i++)); do
-	total_storage+=$disk_sizes[$i]       
+    total_storage+=${disk_sizes[$i]}
 done
 
+##
+## BATTERY HEALTH
+## Only works on one battery for the moment.
+##
+batt_root="/sys/class/power_supply/BAT0"
+if  [[ -f "$batt_root/energy_full_design" ]]; then
+    batt_current_capacity=$(<"$batt_root/energy_full")
+    batt_design_capacity=$(<"$batt_root/energy_full_design")
+    # Weirdly bc insists on added two decimal points for every scale / level of accuracy so stick to two and drop the .00
+    batt_health=$(echo "scale=2; $batt_current_capacity / $batt_design_capacity" | bc | cut -d . -f 2)
+elif [[ -f "$batt_root/charge_full_design" ]]; then
+    batt_current_capacity=$(<"$batt_root/charge_full")
+    batt_design_capacity=$(<"$batt_root/charge_full_design")
+    # Weirdly bc insists on added two decimal points for every scale / level of accuracy so stick to two and drop the .00
+    batt_health=$(echo "scale=2; $batt_current_capacity / $batt_design_capacity" | bc | cut -d . -f 2)
+else
+    batt_health="Unknown"
+fi
+
+
+
 output_string=$(jq -n \
+                   --arg id "$device_id" \
                    --arg make "$system_manufacturer" \
                    --arg model "$system_model" \
                    --arg version "$system_version" \
@@ -89,10 +132,10 @@ output_string=$(jq -n \
 ##
 
 if [ ! -d "$output_dir" ]; then
-	mkdir $output_dir
+    mkdir $output_dir
 fi
 
-echo $output_string > "${output_dir}/$(date +%Y-%m-%d)--$system_serial_number.json"
+echo "$output_string" > "${output_dir}/$(date +%Y-%m-%d)--$device_id--$system_serial_number.json"
 
 ### PRINTING FOR TROUBLESHOOTING
 #
