@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#! /bin/bash
 #####################
 #
 # Script to sync hardware clock with NTP

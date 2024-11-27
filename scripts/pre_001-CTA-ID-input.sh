@@ -1,4 +1,4 @@
-#! /usr/bin/bash
+#! /bin/bash
 #####################
 #
 # Script to capture CTA ID input from users

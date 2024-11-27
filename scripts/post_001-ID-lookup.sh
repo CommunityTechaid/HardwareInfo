@@ -1,4 +1,4 @@
-#! /usr/bin/bash
+#! /bin/bash
 #####################
 #
 # Script to display CTA ID and wipe status to user
