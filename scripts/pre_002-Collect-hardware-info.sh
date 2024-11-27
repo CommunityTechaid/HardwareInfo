@@ -1,4 +1,4 @@
-#! /usr/bin/bash
+#! /bin/bash
 #####################
 #
 # Script to programmatically collect hardware infomation to then add to TaDa
@@ -93,7 +93,12 @@ done
 ## BATTERY HEALTH
 ## Only works on one battery for the moment.
 ##
-batt_root="/sys/class/power_supply/BAT0"
+if [[ -d "/sys/class/power_supply/BAT1" ]]; then
+    batt_root="/sys/class/power_supply/BAT1"
+else
+    batt_root="/sys/class/power_supply/BAT0"
+fi
+
 if  [[ -f "$batt_root/energy_full_design" ]]; then
     batt_current_capacity=$(<"$batt_root/energy_full")
     batt_design_capacity=$(<"$batt_root/energy_full_design")
@@ -105,7 +110,7 @@ elif [[ -f "$batt_root/charge_full_design" ]]; then
     # Weirdly bc insists on added two decimal points for every scale / level of accuracy so stick to two and drop the .00
     batt_health=$(echo "scale=2; $batt_current_capacity / $batt_design_capacity" | bc | cut -d . -f 2)
 else
-    batt_health="Unknown"
+    batt_health=-1
 fi
 
 
@@ -124,6 +129,7 @@ output_string=$(jq -n \
                    --arg type "$device_type" \
                    --arg typeOfStorage "$is_hdd" \
                    --arg storageCapacity "$disk_sizes" \
+                   --argjson batteryHealth "$batt_health" \
                    '$ARGS.named')
 
 

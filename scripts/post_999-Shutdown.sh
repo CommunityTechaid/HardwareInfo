@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#! /bin/bash
 #####################
 #
 # Script to display warning dialog before shutting down the machine
