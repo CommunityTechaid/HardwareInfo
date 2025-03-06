@@ -48,7 +48,7 @@ else
     # Create .json format to push
     output_string=$(jq -n \
                        --arg id "$device_id" \
-                       --argjson wipeFailed true \
+                       --argjson wipeFailed '"true"' \
                        '{id: $id, subStatus: { wipeFailed: $wipeFailed }}')
 fi
 
