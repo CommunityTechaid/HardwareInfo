@@ -39,15 +39,19 @@ wipe_status=$(get_wipe_status)
 # Device wipe failed = PROCESSING_FAILED_WIPE
 if [ "$wipe_status" = "Wiped." ]; then
     echo "PROCESSING_WIPED" > STATUS
+    # Create .json format to push
+    output_string=$(jq -n \
+                       --arg id "$device_id" \
+                       --arg status "$(<STATUS)" \
+                       '$ARGS.named')
 else
-    echo "PROCESSING_FAILED_WIPE" > STATUS
+    # Create .json format to push
+    output_string=$(jq -n \
+                       --arg id "$device_id" \
+                       --argjson wipeFailed true \
+                       '{id: $id, subStatus: { wipeFailed: $wipeFailed }}')
 fi
 
-# Create .json format to push
-output_string=$(jq -n \
-                   --arg id "$device_id" \
-                   --arg status "$(<STATUS)" \
-                   '$ARGS.named')
 
 echo "$output_string" > "$device_id".status
 
