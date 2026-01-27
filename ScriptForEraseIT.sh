@@ -96,6 +96,9 @@ else
                        '{id: $id, subStatus: { wipeFailed: $wipeFailed }}')
 fi
 
+# Create temp_dir to work in
+temp_dir=$(mktemp -d)
+
 echo "$output_string" > "$temp_dir"/"$id".status
 
 # Construct command string
@@ -108,8 +111,6 @@ lftp_status_command="open 10.0.0.1; \
 
 lftp -c "$lftp_status_command"
 
-# Create temp_dir to work in
-temp_dir=$(mktemp -d)
 
 # Fetch script
 lftp_get_script="open 10.0.0.1; \
