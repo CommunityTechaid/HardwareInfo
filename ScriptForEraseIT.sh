@@ -44,6 +44,8 @@ confirm_id () {
         --yesno "You have entered \Zb\Z1${DEV_ID}\Zn\n\nIs this the correct device ID?" 10 30
 }
 
+# Create temp_dir to work in
+temp_dir=$(mktemp -d)
 
 # Look for device ID
 # File name contains ID
@@ -54,6 +56,8 @@ if [ -f /home/reports/*.json ]; then
     id=$(cut -d - -f 3 <<< "$file_name")
     # Get wipe status from report name
     wipe_report_status=$(cut -d "-" -f 6 <<< "$file_name" | cut -d "." -f 1)
+    # cp EraseIT report to temp before pushing to Theta
+    cp "/home/reports/$file_name" "$temp_dir/"
 else
     # Report doesn't exist so get ID from user
     until get_device_id && check_id && confirm_id; do :; done
@@ -96,8 +100,6 @@ else
                        '{id: $id, subStatus: { wipeFailed: $wipeFailed }}')
 fi
 
-# Create temp_dir to work in
-temp_dir=$(mktemp -d)
 
 echo "$output_string" > "$temp_dir"/"$id".status
 
@@ -139,11 +141,12 @@ rm CTA_ID
 hardware_info=$(basename $temp_dir/$(date +%Y-%m-%d)--$id--*.json)
 
 # Construct command string
-status_dir="shredos"
+status_dir="EraseIT"
 lftp_hw_command="open 10.0.0.1; \
             user $user $pass; \
             cd $status_dir; \
-            put $temp_dir/$hardware_info ; \
+            put $temp_dir/$hardware_info ;
+            put $temp_dir/Raw_EraseIT_Logs/$file_name ; \
             exit"
 
 

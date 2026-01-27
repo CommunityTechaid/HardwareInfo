@@ -77,7 +77,7 @@ declare -a disk_names
 declare -a disk_sizes
 declare -a is_hdd
 
-disk_info=$(lsblk --path -AdJbo NAME,SIZE,ROTA)
+disk_info=$(lsblk -e 7 --path -AdJbo NAME,SIZE,ROTA)
 disk_names+=($(jq -r '.blockdevices[] | .name' <<< "$disk_info"))
 disk_sizes+=($(jq -r '.blockdevices[] | .size' <<< "$disk_info"))
 is_hdd+=($(jq -r '.blockdevices[] | .rota' <<< "$disk_info"))
@@ -85,7 +85,7 @@ is_hdd+=($(jq -r '.blockdevices[] | .rota' <<< "$disk_info"))
 disk_number=$(jq '.blockdevices' <<< "$disk_info" | jq length)
 
 total_storage=0
-for ((i=1;i<=disk_number;i++)); do
+for ((i=0;i<disk_number;i++)); do
     total_storage+=${disk_sizes[$i]}
 done
 
