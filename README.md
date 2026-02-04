@@ -41,6 +41,10 @@ This script gathers information, ftps it to Theta and presents it in a UI to the
 ### ./scripts/post_999-Shutdown.sh
 
 Presents GUI to shutdown device
+
+### ./ScriptForEraseIT.sh
+
+This is a wrapper script that is to be embedded in the EraseIT image to pull `pre_002-Collect-hardware-info.sh` and generate hardware info .json files when using EraseIT for wiping.
 	
 ### CTA-HardwareInfo.sh
 
